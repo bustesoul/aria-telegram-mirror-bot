@@ -233,8 +233,22 @@ function localStorageFile(dlDetails: DlVars, filePath: string, fileName: string,
     // Create date directory if not exists
     fs.mkdirSync(destDir, { recursive: true });
 
-    // Move file/folder to destination
-    fs.renameSync(filePath, destPath);
+    // Try rename first, fall back to copy+delete for cross-device moves
+    try {
+      fs.renameSync(filePath, destPath);
+    } catch (renameErr: any) {
+      if (renameErr.code === 'EXDEV') {
+        // Cross-device link, need to copy then delete
+        if (isFolder) {
+          fs.cpSync(filePath, destPath, { recursive: true });
+        } else {
+          fs.copyFileSync(filePath, destPath);
+        }
+        fs.rmSync(filePath, { recursive: true, force: true });
+      } else {
+        throw renameErr;
+      }
+    }
 
     console.log(`${dlDetails.gid}: Moved to local storage: ${destPath}`);
     callback(null, dlDetails.gid, destPath, filePath, fileName, fileSize, isFolder);
