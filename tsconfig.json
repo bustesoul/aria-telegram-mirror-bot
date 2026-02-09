@@ -5,7 +5,9 @@
     "module": "commonjs",
     "noImplicitAny": true,
     "allowJs": true,
-    "sourceMap": false
+    "sourceMap": false,
+    "skipLibCheck": true,
+    "declaration": false
   },
   "include": [
     "./src/**/*"
