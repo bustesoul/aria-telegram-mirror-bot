@@ -6,6 +6,5 @@ client_secret.json
 credentials.json
 npm-debug.log
 out/
-package-lock.json
 service_account.json
 DEPLOY_SECRETS.txt
