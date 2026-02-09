@@ -20,7 +20,7 @@ var dlManager = dlm.DlManager.getInstance();
 
 initAria2();
 
-bot.on("polling_error", msg => console.error(msg.message));
+bot.on("polling_error", msg => console.error("POLLING_ERROR:", JSON.stringify(msg, null, 2)));
 
 function setEventCallback(regexp: RegExp, regexpNoName: RegExp,
   callback: ((msg: TelegramBot.Message, match?: RegExpExecArray) => void)): void {
