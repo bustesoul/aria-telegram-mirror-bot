@@ -25,9 +25,8 @@ bot.on("polling_error", err => console.error(err.message));
 function setEventCallback(regexp: RegExp, regexpNoName: RegExp,
   callback: ((msg: TelegramBot.Message, match?: RegExpExecArray) => void)): void {
   bot.onText(regexpNoName, (msg, match) => {
-    // Return if the command didn't have the bot name for non PMs ("Bot name" could be blank depending on config)
-    if (msg.chat.type !== 'private' && !match[0].match(regexp))
-      return;
+    // In group chats, accept both /command and /command@botname
+    // (regexpNoName already matches both patterns)
     callback(msg, match);
   });
 }
