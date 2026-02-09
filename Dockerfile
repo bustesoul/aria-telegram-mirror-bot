@@ -4,6 +4,9 @@ WORKDIR /mirrorbot
 COPY package*.json ./
 RUN npm ci
 COPY . .
+# 复制 example 配置文件供编译用
+RUN cp src/.constants.js.example src/.constants.js
+RUN cp aria.sh.example aria.sh
 ENV NODE_OPTIONS="--max-old-space-size=4096"
 RUN npm run build
 
