@@ -1,9 +1,24 @@
-FROM ubuntu:focal
-ENV DEBIAN_FRONTEND=noninteractive
-RUN apt update -y
-RUN apt install aria2 npm nodejs -y
-COPY . /mirrorbot
+# -------- builder --------
+FROM node:20-bookworm AS builder
 WORKDIR /mirrorbot
-RUN npm install
-RUN NODE_OPTIONS="--max-old-space-size=4096" npm run build
-ENTRYPOINT ./aria.sh && NTBA_FIX_319=1 node ./out/index.js
+COPY package*.json ./
+RUN npm ci
+COPY . .
+ENV NODE_OPTIONS="--max-old-space-size=4096"
+RUN npm run build
+
+# -------- runtime --------
+FROM node:20-bookworm-slim AS runtime
+WORKDIR /mirrorbot
+
+# aria2 放运行阶段装
+RUN apt-get update && apt-get install -y aria2 && rm -rf /var/lib/apt/lists/*
+
+COPY package*.json ./
+RUN npm ci --omit=dev
+COPY --from=builder /mirrorbot/out ./out
+COPY --from=builder /mirrorbot/aria.sh ./aria.sh
+RUN chmod +x ./aria.sh
+
+# 用 bash -lc 才能让 && 正常工作
+ENTRYPOINT ["bash", "-lc", "./aria.sh && NTBA_FIX_319=1 node ./out/index.js"]
