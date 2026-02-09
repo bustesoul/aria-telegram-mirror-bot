@@ -6,5 +6,22 @@ ARIA_RPC_SECRET="some long key"
 MAX_CONCURRENT_DOWNLOADS=3
 ## The port that RPC will listen on
 RPC_LISTEN_PORT=8210
-aria2c --enable-rpc --rpc-listen-all=false --rpc-listen-port $RPC_LISTEN_PORT --max-concurrent-downloads=$MAX_CONCURRENT_DOWNLOADS --max-connection-per-server=10 --rpc-max-request-size=1024M --seed-time=0.01 --min-split-size=10M --follow-torrent=mem --split=10 --rpc-secret=$ARIA_RPC_SECRET --max-overall-upload-limit=1 --daemon=true
+## BT listen port for incoming connections
+BT_LISTEN_PORT=51413
+
+# Fetch best trackers
+echo "Fetching best trackers..."
+TRACKERS=$(curl -fsSL https://raw.githubusercontent.com/ngosang/trackerslist/master/trackers_best.txt 2>/dev/null | grep -v '^$' | paste -sd, -)
+
+aria2c --enable-rpc --rpc-listen-all=false --rpc-listen-port=$RPC_LISTEN_PORT \
+  --max-concurrent-downloads=$MAX_CONCURRENT_DOWNLOADS \
+  --max-connection-per-server=10 --rpc-max-request-size=1024M \
+  --seed-time=0.01 --min-split-size=10M --follow-torrent=mem \
+  --split=10 --rpc-secret=$ARIA_RPC_SECRET \
+  --max-overall-upload-limit=1 \
+  --enable-dht=true --enable-peer-exchange=true --bt-enable-lpd=true \
+  --listen-port=$BT_LISTEN_PORT --enable-incoming=true --bt-max-open-files=100 \
+  --bt-tracker="$TRACKERS" \
+  --check-certificate=false \
+  --daemon=true
 echo "Aria2c daemon started"
