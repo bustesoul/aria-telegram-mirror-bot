@@ -98,7 +98,7 @@ docker run -d \
   --restart unless-stopped \
   -v ~/mirror-bot/downloads:/mirrorbot/downloads \
   -v ~/mirror-bot/service_account.json:/mirrorbot/service_account.json:ro \
-  -v ~/mirror-bot/.constants.js:/mirrorbot/src/.constants.js:ro \
+  -v ~/mirror-bot/.constants.js:/mirrorbot/out/.constants.js:ro \
   -v ~/mirror-bot/aria.sh:/mirrorbot/aria.sh:ro \
   ghcr.io/bustesoul/aria-mirror-bot:latest
 ```

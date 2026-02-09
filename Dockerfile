@@ -20,8 +20,9 @@ RUN apt-get update && apt-get install -y aria2 && rm -rf /var/lib/apt/lists/*
 COPY package*.json ./
 RUN npm ci --omit=dev
 COPY --from=builder /mirrorbot/out ./out
-COPY --from=builder /mirrorbot/aria.sh ./aria.sh
+COPY aria.sh.example ./aria.sh
 RUN chmod +x ./aria.sh
 
+# 配置文件挂载点：/mirrorbot/out/.constants.js 和 /mirrorbot/aria.sh
 # 用 bash -lc 才能让 && 正常工作
 ENTRYPOINT ["bash", "-lc", "./aria.sh && NTBA_FIX_319=1 node ./out/index.js"]
