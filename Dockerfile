@@ -15,7 +15,7 @@ FROM node:20-bookworm-slim AS runtime
 WORKDIR /mirrorbot
 
 # aria2 放运行阶段装
-RUN apt-get update && apt-get install -y aria2 && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y aria2 ca-certificates && rm -rf /var/lib/apt/lists/*
 
 COPY package*.json ./
 RUN npm ci --omit=dev

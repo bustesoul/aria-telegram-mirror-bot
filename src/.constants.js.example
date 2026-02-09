@@ -25,5 +25,9 @@ module.exports = Object.freeze({
     NAME: "@nameOf_bot"
   },
   IS_TEAM_DRIVE: false,
-  INDEX_URL: '' // Optional: URL prefix for index links (e.g. 'https://your-index.com/')
+  INDEX_URL: '', // Optional: URL prefix for index links (e.g. 'https://your-index.com/')
+  
+  // Local storage mode: skip Google Drive upload, save files locally organized by date
+  LOCAL_STORAGE_ONLY: false,
+  LOCAL_STORAGE_PATH: '/mirrorbot/completed' // Where to store completed downloads (organized by date: YYYY-MM-DD/filename)
 });

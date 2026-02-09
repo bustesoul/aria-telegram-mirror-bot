@@ -576,16 +576,28 @@ function driveUploadCompleteCallback(err: string, gid: string, url: string, file
     finalMessage = `Failed to upload <code>${fileName}</code> to Drive. ${message}`;
     cleanupDownload(gid, finalMessage, null, null, true);
   } else {
-    if (constants.INDEX_URL) {
-      url = constants.INDEX_URL + fileName
-    }
-    console.log(`${gid}: Uploaded `);
-    if (fileSize) {
-      var fileSizeStr = downloadUtils.formatSize(fileSize);
-      finalMessage = `<a href="${url}">${fileName}</a> (${fileSizeStr})`;
+    // Local storage mode: show file path instead of Drive link
+    if ((constants as any).LOCAL_STORAGE_ONLY) {
+      console.log(`${gid}: Saved to local storage`);
+      if (fileSize) {
+        var fileSizeStr = downloadUtils.formatSize(fileSize);
+        finalMessage = `✅ <code>${fileName}</code> (${fileSizeStr})\n📁 <code>${url}</code>`;
+      } else {
+        finalMessage = `✅ <code>${fileName}</code>\n📁 <code>${url}</code>`;
+      }
+      cleanupDownload(gid, finalMessage, url);
     } else {
-      finalMessage = `<a href="${url}">${fileName}</a>`;
+      if (constants.INDEX_URL) {
+        url = constants.INDEX_URL + fileName
+      }
+      console.log(`${gid}: Uploaded `);
+      if (fileSize) {
+        var fileSizeStr = downloadUtils.formatSize(fileSize);
+        finalMessage = `<a href="${url}">${fileName}</a> (${fileSizeStr})`;
+      } else {
+        finalMessage = `<a href="${url}">${fileName}</a>`;
+      }
+      cleanupDownload(gid, finalMessage, url);
     }
-    cleanupDownload(gid, finalMessage, url);
   }
 }

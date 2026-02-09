@@ -6,6 +6,8 @@ import tar = require('../drive/tar');
 const diskspace = require('diskspace');
 import filenameUtils = require('./filename-utils');
 import { DlVars } from '../dl_model/detail';
+import * as fs from 'fs';
+import * as path from 'path';
 
 const ariaOptions = {
   host: 'localhost',
@@ -167,6 +169,13 @@ export function uploadFile(dlDetails: DlVars, filePath: string, fileSize: number
   dlDetails.isUploading = true;
   var fileName = filenameUtils.getFileNameFromPath(filePath, null);
   var realFilePath = filenameUtils.getActualDownloadPath(filePath);
+
+  // Local storage mode: move file to date-organized directory instead of uploading to Drive
+  if ((constants as any).LOCAL_STORAGE_ONLY) {
+    localStorageFile(dlDetails, realFilePath, fileName, fileSize, callback);
+    return;
+  }
+
   if (dlDetails.isTar) {
     if (filePath === realFilePath) {
       // If there is only one file, do not archive
@@ -208,6 +217,31 @@ function driveUploadFile(dlDetails: DlVars, filePath: string, fileName: string, 
     (err: string, url: string, isFolder: boolean) => {
       callback(err, dlDetails.gid, url, filePath, fileName, fileSize, isFolder);
     });
+}
+
+/**
+ * Local storage mode: move file to date-organized directory
+ */
+function localStorageFile(dlDetails: DlVars, filePath: string, fileName: string, fileSize: number, callback: DriveUploadCompleteCallback): void {
+  const storagePath = (constants as any).LOCAL_STORAGE_PATH || '/mirrorbot/completed';
+  const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+  const destDir = path.join(storagePath, today);
+  const destPath = path.join(destDir, fileName);
+  const isFolder = fs.statSync(filePath).isDirectory();
+
+  try {
+    // Create date directory if not exists
+    fs.mkdirSync(destDir, { recursive: true });
+
+    // Move file/folder to destination
+    fs.renameSync(filePath, destPath);
+
+    console.log(`${dlDetails.gid}: Moved to local storage: ${destPath}`);
+    callback(null, dlDetails.gid, destPath, filePath, fileName, fileSize, isFolder);
+  } catch (err: any) {
+    console.error(`${dlDetails.gid}: Failed to move to local storage: ${err.message}`);
+    callback(err.message, dlDetails.gid, null, filePath, fileName, fileSize, isFolder);
+  }
 }
 
 export function stopDownload(gid: string, callback: () => void): void {
